@@ -14,7 +14,7 @@
 * 8192 Bytes
 * Connected to the battery
 * It keeps the programmed text
-* Connected to the EPROM, maybe the EPROM reloads the default data the RAM if the battery is low?
+* Connected to the EPROM, maybe the EPROM reloads the default data to the RAM if the battery is low?
 ### EPROM
 [Intel D27128](https://archive.org/details/IntelD27128Datasheet)
 * 128 Kb
@@ -28,11 +28,11 @@ ASLC AX5210B
 * maybe is the IC for the real time clock functionality?
 
 ## RS232
-[a pretty good documentation(it is in german)](http://sigma.haufe.org/index.php?content=home)
-Only the RX line is really connected to the microcontroller.
+[a pretty good documentation(it is in german)](http://sigma.haufe.org/index.php?content=home).
+Only the RX line is really connected to the microcontroller. Also, the microcontroller does not have a serial port, so it is implemented virtually, using the interupt pin. 
 
 ## Python scripts
 ### enconde_and_send.py
-It will program the content of text.txt to the display
+It will program the content of `text.txt` to the display.
 ### tg_bot.py
 A small Telegram bot that will send the messages replayed with the `/display` command or a formated text with `/gen`
