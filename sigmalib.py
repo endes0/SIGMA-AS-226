@@ -103,15 +103,6 @@ def send(line, tty_port):
     port.write(line)
     port.close()
 
-def clock(tty_port):
-    port = serial.Serial(tty_port, 2400, timeout=1)
-    line = START
-    line += (17).to_bytes(1, 'big')
-    line += END
-    print(line)
-    port.write(line)
-    port.close()
-
 def fuzz(tty_port):
     port = serial.Serial(tty_port, 2400, timeout=1)
     line = START
