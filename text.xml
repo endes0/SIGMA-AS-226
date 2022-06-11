@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<composition>
+    <jump>You can fit up to 16 chars</jump>
+    <open>before it does not fit</open>
+    <up>in one shot</up>
+    <wait time="9" />
+    <down>wait 9 is aprox 3,3 sec</down>
+    <wait time="5" />
+    <big>wait 5 is aprox 1,5 sec</big>
+    <doff><speed time="9" />you<speed time="5" /> can<speed time="0" /> change the speed</doff>
+    <clock />
+</composition>

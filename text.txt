@@ -1,8 +1,0 @@
-<JUMP>You can fit up to 16 chars
-<OPEN>before it does not fit
-<UP>in one shot
-<WAIT><9>
-<DOWN>wait 9 is aprox 3,3 sec
-<WAIT><5>
-<BIG>wait 5 is aprox 1,5 sec
-

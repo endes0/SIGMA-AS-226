@@ -1,6 +1,6 @@
-from click import echo
 import serial  # pyserial
 import unidecode
+from defusedxml.ElementTree import fromstring, parse
 
 
 START = b'\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xBB\x8C'
@@ -19,89 +19,89 @@ CMD_DICT = {
     "DOFF": 0x8A,
     "BIG": 0x8B,
     "RANDOM": 0x8E,
+
     "CLOCK": 0x11,
 
     "WAIT": 0x8F,
     "SPEED": 0x8D
 }
+# yeah, it's strange, but there are a lot of symbols not coded in ascii
+ENCODING_DICT = {
+    " ": ":".encode('ascii'),
+    ":": " ".encode('ascii'),
+    "<": "_".encode('ascii'),
+    "_": "<".encode('ascii'),
+    "[": b'\x0E',
+    "]": b'\x1E'
+}
 
 
-def cmd_to_byte(cmd):
-    if cmd >= '1' and cmd <= '9':
-        return (ord(cmd) - ord('0') + 0x30).to_bytes(1, 'big')
-    elif cmd in CMD_DICT:
-        return CMD_DICT[cmd].to_bytes(1, 'big')
-    else:
-        return b'0'
+def encode_cmd_number(num):
+    return (ord(num) - ord('0') + 0x30).to_bytes(1, 'big')
 
 
-def encode(line):
-    # state machine for encoding
-    cmd = ""
-    is_cmd_reading = False
+def process_text(text, align=True):
+    # encode text
+    text = unidecode.unidecode(text)
+    for key in ENCODING_DICT:
+        text = text.replace(key, ENCODING_DICT[key])
+
+    # center align text if it is not too long and not has noalign attribute
+    if align:
+        if len(text) <= 16:
+            text = text.center(16, ':')
+
+    return text
+
+
+def xml_encode(xml_root):
     final = bytearray()
-    is_escape = False
-    counter = 0
-    for c in line:
-        if c == '<' and not is_escape:
-            is_cmd_reading = True
-            cmd = ""
-        elif c == '>' and is_cmd_reading:
-            if counter > 0 and counter < 16 and cmd != "SPEED" and cmd != "WAIT" and not cmd.isnumeric():
-                # center adding spaces
-                #final.extend(':'.encode('ascii') * ((16 - counter)//2))
-                counter = 0
-            elif cmd != "SPEED" and cmd != "WAIT" and not cmd.isnumeric():
-                counter = 0
-
-            is_cmd_reading = False
-            final += cmd_to_byte(cmd)
-        elif c == '\\' and not is_escape:
-            is_escape = True
-        elif is_cmd_reading:
-            cmd += c
+    for anim in xml_root:
+        # encode command depending on the type of tag
+        if anim.tag.upper() in CMD_DICT:
+            final += CMD_DICT[anim.tag.upper()].to_bytes(1, 'big')
         else:
-            if is_escape:
-                is_escape = False
-                final += '\\'.encode('ascii')
-                counter += 1
-            
-            if c == '\n':
-              pass
-            elif c == '\r':
-              pass
-            elif c == '\t':
-              pass
-             # yeah, It's strange, but there are a lot of symbols coded not in ascii
-             #TODO: a dict like CMD_DICT
-            elif c == ' ':
-                final += ':'.encode('ascii')
-                counter += 1
-            elif c == ':':
-                final += ' '.encode('ascii')
-                counter += 1
-            elif c == '<':
-                final += '_'.encode('ascii')
-                counter += 1
-            elif c == '[':
-                final += b'\x0E'
-                counter += 1
-            elif c == ']':
-                final += b'\x1E'
-                counter += 1
-            else:
-                final += unidecode.unidecode(c).encode('ascii')
-                counter += 1
+            # throw error
+            pass
+
+        # Special cases
+        if anim.tag == "wait":
+            if "time" in anim.attrib:
+                final += encode_cmd_number(anim.atrib["time"])
+        elif anim.tag == "speed":
+            if "time" in anim.attrib:
+                final += encode_cmd_number(anim.atrib["time"])
+        elif anim.tag == "clock":
+            pass
+        else:
+            align = "noalign" not in anim.attrib
+
+            final += process_text(anim.text, align).encode('ascii')
+            for child in anim:
+                final += xml_encode(child)
+
     return final
 
 
-def send(line, tty_port):
+def encode(line):
+    return xml_encode(fromstring(line))
+
+
+def send_encoded(data, tty_port):
     port = serial.Serial(tty_port, 2400, timeout=1)
-    line = encode(line)
-    print(line)
-    line = START + line + END
-    port.write(line)
+    print(data)
+    data = START + data + END
+    port.write(data)
     port.close()
+
+
+def send_line(line, tty_port):
+    send_encoded(encode(line), tty_port)
+
+
+def send_file(xml_file, tty_port):
+    send_encoded(xml_encode(parse(xml_file).getroot()), tty_port)
+
 
 def fuzz(tty_port):
     port = serial.Serial(tty_port, 2400, timeout=1)

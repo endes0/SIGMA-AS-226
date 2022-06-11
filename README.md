@@ -35,4 +35,4 @@ Only the RX line is really connected to the microcontroller. Also, the microcont
 ### enconde_and_send.py
 It will program the content of `text.txt` to the display.
 ### tg_bot.py
-A small Telegram bot that will send the messages replayed with the `/display` command or a formated text with `/gen`
+A small Telegram bot that will send the messages replayed with the `/display` command or a formated text with `/gen`.
