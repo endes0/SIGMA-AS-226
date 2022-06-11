@@ -27,12 +27,12 @@ CMD_DICT = {
 }
 # yeah, it's strange, but there are a lot of symbols not coded in ascii
 ENCODING_DICT = {
-    " ": ":".encode('ascii'),
-    ":": " ".encode('ascii'),
-    "<": "_".encode('ascii'),
-    "_": "<".encode('ascii'),
-    "[": b'\x0E',
-    "]": b'\x1E'
+    " ": ":",
+    ":": " ",
+    "<": "_",
+    "_": "<",
+    "[": '\x0E',
+    "]": '\x1E'
 }
 
 
@@ -67,16 +67,17 @@ def xml_encode(xml_root):
         # Special cases
         if anim.tag == "wait":
             if "time" in anim.attrib:
-                final += encode_cmd_number(anim.atrib["time"])
+                final += encode_cmd_number(anim.attrib["time"])
         elif anim.tag == "speed":
             if "time" in anim.attrib:
-                final += encode_cmd_number(anim.atrib["time"])
+                final += encode_cmd_number(anim.attrib["time"])
         elif anim.tag == "clock":
             pass
         else:
             align = "noalign" not in anim.attrib
 
-            final += process_text(anim.text, align).encode('ascii')
+            if anim.text is not None:
+                final += process_text(anim.text, align).encode('ascii')
             for child in anim:
                 final += xml_encode(child)
 
