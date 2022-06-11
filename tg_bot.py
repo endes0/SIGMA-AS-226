@@ -10,12 +10,12 @@ async def gen(update: Update, context: CallbackContext.DEFAULT_TYPE) -> None:
         #get the text
         text = update.message.reply_to_message.text
         #send the text
-        sigmalib.send(text, tty_port = "/dev/ttyUSB0")
+        sigmalib.send_line(text, tty_port = "/dev/ttyUSB0")
     else:
         #get the text
         text = update.message.text[4:]
         #send the text
-        sigmalib.send(text, tty_port = "/dev/ttyUSB0")
+        sigmalib.send_line(text, tty_port = "/dev/ttyUSB0")
     
 async def display(update: Update, context: CallbackContext.DEFAULT_TYPE) -> None:
     #check if is a response
@@ -27,12 +27,8 @@ async def display(update: Update, context: CallbackContext.DEFAULT_TYPE) -> None
         #escape < and >
         text = text.replace("<", "\<")
 
-        #fill the text lenght with spaces
-        text = text.ljust(len(text) + 16)
-
-
         #send the text
-        sigmalib.send(text, tty_port = "/dev/ttyUSB0")
+        sigmalib.send_line("<?xml version=\"1.0\"?><composition><left>" + text + "</left></composition>", tty_port = "/dev/ttyUSB0")
     else:
         #error
         await update.message.reply_text("Error, debes responder a un mensaje")
